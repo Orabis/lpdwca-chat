@@ -592,8 +592,37 @@ select:focus {
 .chat-messages {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: auto;
+  gap: 1rem;
+  padding: 1.5rem;
+
+  .chat-message {
+    max-width: 75%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+
+    .message-time {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+      align-self: flex-end;
+    }
+
+    &.received {
+      align-self: flex-start;
+      background-color: var(--bubble-other);
+      color: var(--bubble-other-text);
+      border-bottom-left-radius: 2px;
+    }
+
+    &.sent {
+      align-self: flex-end;
+      background-color: var(--bubble-self);
+      color: var(--bubble-self-text);
+      border-bottom-right-radius: 2px;
+    }
+  }
 }
 
 .date-divider {

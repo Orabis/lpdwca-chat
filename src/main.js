@@ -1,7 +1,20 @@
 import './style.css'
+import './profile.js'
+import { supabase } from './supabase.js'
 
 const ContactsList = document.getElementById('contacts-list')
 const LoadingContacts = document.getElementById('loading-placeholder')
+const ChatEmptyState = document.getElementById('chat-empty-state')
+const ChatInterface = document.getElementById('chat-interface')
+const ChatMessages = document.getElementById('chat-messages')
+const ActiveName = document.getElementById('active-name')
+const ActiveAvatar = document.getElementById('active-avatar')
+const chatForm = document.getElementById('chat-form')
+const chatInput = document.getElementById('chat-input')
+
+let currentActiveUserId = null
+const MY_USER_ID = 0
+
 const users = [
   {
     id: 1,
@@ -33,8 +46,6 @@ const users = [
   },
 ]
 
-
-
 const messages = [
   {
     id: 101,
@@ -62,7 +73,76 @@ const messages = [
   },
 ]
 
-if (users.length >= 1) {
+function displayConversation(userId) {
+  const user = users.find((u) => u.id === userId)
+  if (!user) return
+
+  currentActiveUserId = userId
+
+  ActiveName.textContent = `${user.options.FirstName} ${user.options.LastName}`
+  ActiveAvatar.textContent = user.options.FirstName[0]
+  ChatMessages.replaceChildren()
+
+  const conversationMessages = messages.filter(
+    (m) => m.userId === userId || (m.userId === MY_USER_ID && m.contactId === userId)
+  )
+
+  if (conversationMessages.length === 0) {
+    const emptyMsgDiv = document.createElement('div')
+    emptyMsgDiv.classList.add('chat-message', 'system')
+    emptyMsgDiv.textContent = 'Aucun message pour le moment.'
+    ChatMessages.appendChild(emptyMsgDiv)
+  } else {
+    const fragment = document.createDocumentFragment()
+
+    conversationMessages.forEach((msg) => {
+      const msgDiv = document.createElement('div')
+
+      if (msg.userId === MY_USER_ID) {
+        msgDiv.classList.add('chat-message', 'sent')
+      } else {
+        msgDiv.classList.add('chat-message', 'received')
+      }
+
+      const contentDiv = document.createElement('div')
+      contentDiv.classList.add('message-content')
+      contentDiv.textContent = msg.content
+
+      const timeSpan = document.createElement('span')
+      timeSpan.classList.add('message-time')
+      timeSpan.textContent = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+      msgDiv.append(contentDiv, timeSpan)
+      fragment.appendChild(msgDiv)
+    })
+    ChatMessages.appendChild(fragment)
+    ChatMessages.scrollTop = ChatMessages.scrollHeight
+  }
+
+  ChatEmptyState.style.display = 'none'
+  ChatInterface.style.display = 'flex'
+}
+
+chatForm.addEventListener('submit', (e) => {
+  e.preventDefault()
+
+  const text = chatInput.value.trim()
+  if (!text || !currentActiveUserId) return
+
+  const newMessage = {
+    id: Date.now(),
+    userId: MY_USER_ID,
+    contactId: currentActiveUserId,
+    content: text,
+    timestamp: new Date().toISOString(),
+  }
+
+  messages.push(newMessage)
+  chatInput.value = ''
+  displayConversation(currentActiveUserId)
+})
+
+if (users) {
   ContactsList.removeChild(LoadingContacts)
   users.forEach((user) => {
     const card = document.createElement('div')
@@ -78,8 +158,9 @@ if (users.length >= 1) {
   const contactItems = document.querySelectorAll('.contact-item')
   contactItems.forEach((item) => {
     item.addEventListener('click', (e) => {
-      console.log(e.target.id)
+      displayConversation(Number(e.target.id))
     })
   })
+} else {
+  console.error("Aucun user n'a été détecté")
 }
-
