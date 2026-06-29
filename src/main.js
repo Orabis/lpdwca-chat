@@ -1,5 +1,7 @@
 import './style.css'
 
+const ContactsList = document.getElementById('contacts-list')
+const LoadingContacts = document.getElementById('loading-placeholder')
 const users = [
   {
     id: 1,
@@ -31,6 +33,8 @@ const users = [
   },
 ]
 
+
+
 const messages = [
   {
     id: 101,
@@ -57,3 +61,25 @@ const messages = [
     timestamp: '2026-06-29T09:21:45Z',
   },
 ]
+
+if (users.length >= 1) {
+  ContactsList.removeChild(LoadingContacts)
+  users.forEach((user) => {
+    const card = document.createElement('div')
+    const firstName = user.options.FirstName
+    const lastName = user.options.LastName
+
+    card.textContent = `${firstName} ${lastName}`
+    card.id = user.id
+    card.classList.add('contact-item')
+    ContactsList.appendChild(card)
+  })
+
+  const contactItems = document.querySelectorAll('.contact-item')
+  contactItems.forEach((item) => {
+    item.addEventListener('click', (e) => {
+      console.log(e.target.id)
+    })
+  })
+}
+
