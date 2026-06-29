@@ -1,5 +1,7 @@
 import './style.css'
 import './profile.js'
+import './status.js'
+
 import { supabase } from './supabase.js'
 
 const ContactsList = document.getElementById('contacts-list')
