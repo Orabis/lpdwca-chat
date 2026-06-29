@@ -2,39 +2,20 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="/favicon.svg"
-    />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>dwca-chat | Messagerie Obsidian</title>
-    <link
-      rel="preconnect"
-      href="https://fonts.googleapis.com"
-    />
-    <link
-      rel="preconnect"
-      href="https://fonts.gstatic.com"
-      crossorigin
-    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
-    <div
-      class="app-container"
-      id="app-container"
-    >
-      <aside
-        class="sidebar"
-        id="sidebar"
-      >
+    <span id="offline-mode">Hors ligne</span>
+    <div class="app-container" id="app-container">
+      <aside class="sidebar" id="sidebar">
         <header class="sidebar-header">
           <div class="brand">
             <span class="brand-logo">
@@ -53,11 +34,7 @@
             <h1>dwca-chat</h1>
           </div>
           <div class="header-actions">
-            <button
-              id="btn-add-contact"
-              title="Nouveau contact"
-              aria-label="Ajouter un contact"
-            >
+            <button id="btn-add-contact" title="Nouveau contact" aria-label="Ajouter un contact">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -67,18 +44,8 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
-                <line
-                  x1="12"
-                  y1="5"
-                  x2="12"
-                  y2="19"
-                ></line>
-                <line
-                  x1="5"
-                  y1="12"
-                  x2="19"
-                  y2="12"
-                ></line>
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
             </button>
           </div>
@@ -96,17 +63,8 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="8"
-                ></circle>
-                <line
-                  x1="21"
-                  y1="21"
-                  x2="16.65"
-                  y2="16.65"
-                ></line>
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
             </span>
             <input
@@ -115,46 +73,22 @@
               placeholder="Rechercher une conversation..."
               aria-label="Rechercher une conversation"
             />
-            <button
-              id="btn-clear-search"
-              style="display: none"
-              aria-label="Effacer la recherche"
-              >&times;</button
-            >
+            <button id="btn-clear-search" style="display: none" aria-label="Effacer la recherche">&times;</button>
           </div>
         </div>
 
-        <nav
-          class="contacts-list"
-          id="contacts-list"
-          aria-label="Liste des conversations"
-        >
+        <nav class="contacts-list" id="contacts-list" aria-label="Liste des conversations">
           <div class="loading-placeholder">Chargement des conversations...</div>
         </nav>
 
         <footer class="sidebar-footer">
-          <div
-            class="current-user-profile"
-            id="current-user-profile"
-          >
-            <div
-              class="user-avatar"
-              id="current-user-avatar"
-              >ME</div
-            >
+          <div class="current-user-profile" id="current-user-profile">
+            <div class="user-avatar" id="current-user-avatar">ME</div>
             <div class="user-details">
-              <span
-                class="user-name"
-                id="current-user-name"
-                >Mon Profil</span
-              >
+              <span class="user-name" id="current-user-name">Mon Profil</span>
               <span class="user-status-text">En ligne</span>
             </div>
-            <button
-              id="btn-edit-profile"
-              title="Modifier le profil"
-              aria-label="Modifier le profil"
-            >
+            <button id="btn-edit-profile" title="Modifier le profil" aria-label="Modifier le profil">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -172,14 +106,8 @@
         </footer>
       </aside>
 
-      <main
-        class="chat-panel"
-        id="chat-panel"
-      >
-        <div
-          class="chat-empty-state"
-          id="chat-empty-state"
-        >
+      <main class="chat-panel" id="chat-panel">
+        <div class="chat-empty-state" id="chat-empty-state">
           <div class="empty-state-content">
             <div class="empty-icon">
               <svg
@@ -196,25 +124,13 @@
             </div>
             <h2>Bienvenue sur dwca-chat</h2>
             <p>Sélectionnez une conversation dans la barre latérale pour commencer à envoyer des messages.</p>
-            <button
-              class="btn btn-primary"
-              id="btn-empty-start-chat"
-              >Nouvelle discussion</button
-            >
+            <button class="btn btn-primary" id="btn-empty-start-chat">Nouvelle discussion</button>
           </div>
         </div>
 
-        <div
-          class="chat-interface"
-          id="chat-interface"
-          style="display: none"
-        >
+        <div class="chat-interface" id="chat-interface" style="display: none">
           <header class="chat-header">
-            <button
-              class="btn-back"
-              id="btn-back"
-              aria-label="Retour aux conversations"
-            >
+            <button class="btn-back" id="btn-back" aria-label="Retour aux conversations">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -228,26 +144,14 @@
               </svg>
             </button>
             <div class="active-contact-info">
-              <div
-                class="user-avatar"
-                id="active-avatar"
-                >U</div
-              >
+              <div class="user-avatar" id="active-avatar">U</div>
               <div>
                 <h2 id="active-name">Nom Utilisateur</h2>
-                <span
-                  class="status-indicator online"
-                  id="active-status"
-                  >En ligne</span
-                >
+                <span class="status-indicator online" id="active-status">En ligne</span>
               </div>
             </div>
             <div class="chat-actions">
-              <button
-                id="btn-clear-chat"
-                title="Effacer l'historique"
-                aria-label="Effacer l'historique de chat"
-              >
+              <button id="btn-clear-chat" title="Effacer l'historique" aria-label="Effacer l'historique de chat">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -264,22 +168,12 @@
             </div>
           </header>
 
-          <div
-            class="chat-messages-container"
-            id="chat-messages-container"
-          >
-            <div
-              class="chat-messages"
-              id="chat-messages"
-            >
-            </div>
+          <div class="chat-messages-container" id="chat-messages-container">
+            <div class="chat-messages" id="chat-messages"> </div>
           </div>
 
           <footer class="chat-input-area">
-            <form
-              id="chat-form"
-              class="chat-form"
-            >
+            <form id="chat-form" class="chat-form">
               <div class="input-actions-left">
                 <button
                   type="button"
@@ -308,11 +202,7 @@
                 autocomplete="off"
                 aria-label="Saisir votre message"
               />
-              <button
-                type="submit"
-                id="btn-send"
-                aria-label="Envoyer le message"
-              >
+              <button type="submit" id="btn-send" aria-label="Envoyer le message">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -322,12 +212,7 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >
-                  <line
-                    x1="22"
-                    y1="2"
-                    x2="11"
-                    y2="13"
-                  ></line>
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
                   <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                 </svg>
               </button>
@@ -335,98 +220,48 @@
           </footer>
         </div>
       </main>
-      <div
-        class="modal-overlay"
-        id="modal-add-contact"
-        style="display: none"
-      >
+      <div class="modal-overlay" id="modal-add-contact" style="display: none">
         <div class="modal-card">
           <header class="modal-header">
             <h3>Ajouter un contact</h3>
-            <button
-              class="modal-close"
-              id="btn-close-add-modal"
-              >&times;</button
-            >
+            <button class="modal-close" id="btn-close-add-modal">&times;</button>
           </header>
           <div class="modal-body">
             <form id="form-add-contact">
               <div class="form-group">
                 <label for="new-contact-name">Nom complet</label>
-                <input
-                  type="text"
-                  id="new-contact-name"
-                  placeholder="Ex: Jean Dupont"
-                  required
-                  autocomplete="off"
-                />
+                <input type="text" id="new-contact-name" placeholder="Ex: Jean Dupont" required autocomplete="off" />
               </div>
               <div class="form-group">
                 <label for="new-contact-status">Statut de départ</label>
                 <select id="new-contact-status">
-                  <option
-                    value="online"
-                    selected
-                    >En ligne</option
-                  >
+                  <option value="online" selected>En ligne</option>
                   <option value="offline">Hors ligne</option>
                 </select>
               </div>
               <div class="form-actions">
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  id="btn-cancel-add-modal"
-                  >Annuler</button
-                >
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  >Ajouter</button
-                >
+                <button type="button" class="btn btn-secondary" id="btn-cancel-add-modal">Annuler</button>
+                <button type="submit" class="btn btn-primary">Ajouter</button>
               </div>
             </form>
           </div>
         </div>
       </div>
-      <div
-        class="modal-overlay"
-        id="modal-edit-profile"
-        style="display: none"
-      >
+      <div class="modal-overlay" id="modal-edit-profile" style="display: none">
         <div class="modal-card">
           <header class="modal-header">
             <h3>Modifier votre profil</h3>
-            <button
-              class="modal-close"
-              id="btn-close-profile-modal"
-              >&times;</button
-            >
+            <button class="modal-close" id="btn-close-profile-modal">&times;</button>
           </header>
           <div class="modal-body">
             <form id="form-edit-profile">
               <div class="form-group">
                 <label for="edit-profile-name">Votre nom d'affichage</label>
-                <input
-                  type="text"
-                  id="edit-profile-name"
-                  placeholder="Ex: Moi"
-                  required
-                  autocomplete="off"
-                />
+                <input type="text" id="edit-profile-name" placeholder="Ex: Moi" required autocomplete="off" />
               </div>
               <div class="form-actions">
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  id="btn-cancel-profile-modal"
-                  >Annuler</button
-                >
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  >Enregistrer</button
-                >
+                <button type="button" class="btn btn-secondary" id="btn-cancel-profile-modal">Annuler</button>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
               </div>
             </form>
           </div>
@@ -434,9 +269,6 @@
       </div>
     </div>
 
-    <script
-      type="module"
-      src="/src/main.js"
-    ></script>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>

@@ -7,9 +7,14 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   plugins: [
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
       registerType: 'autoUpdate',
       devOptions: {
         enabled: true,
+        type: 'module',
+        suppressWarnings: true,
       },
       manifest: {
         name: 'LPDWCA-Chat',

@@ -9,7 +9,6 @@
   "trailingComma": "es5",
   "bracketSpacing": true,
   "arrowParens": "always",
-  "singleAttributePerLine": true,
   "bracketSameLine": false,
   "vueIndentScriptAndStyle": false,
   "htmlWhitespaceSensitivity": "strict",
