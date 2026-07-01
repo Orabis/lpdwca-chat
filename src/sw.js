@@ -16,4 +16,3 @@ registerRoute(
   }),
   'POST'
 )
-
