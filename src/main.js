@@ -160,6 +160,12 @@ chatForm.addEventListener('submit', (e) => {
       if (error) {
         if (!navigator.onLine || error.message === 'TypeError: Failed to fetch') {
           console.log('Message mis en attente pour synchronisation en arrière-plan (mode hors ligne).')
+          if (typeof window.showNotification === 'function') {
+            window.showNotification(
+              'Message non distribué',
+              `Le message "${text}" a été mis en attente et sera envoyé dès le retour de la connexion.`
+            )
+          }
           return
         }
         console.error('Error saving message to Supabase:', error)
@@ -214,11 +220,11 @@ async function loadMessages(username) {
     if (data) {
       data.forEach((msg) => {
         messages.push({
-          id: msg.id,
+          id: msg['id'],
           userId: MY_USER_ID,
-          contactId: msg.contact_id,
-          content: msg.content,
-          timestamp: msg.created_at || msg.timestamp,
+          contactId: msg['contact_id'],
+          content: msg['content'],
+          timestamp: msg['created_at'] || msg['timestamp'],
         })
       })
 
