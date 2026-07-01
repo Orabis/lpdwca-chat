@@ -142,6 +142,29 @@ chatForm.addEventListener('submit', (e) => {
   messages.push(newMessage)
   chatInput.value = ''
   displayConversation(currentActiveUserId)
+
+  const myProfile = JSON.parse(localStorage.getItem('myProfile'))
+  const senderName = myProfile ? myProfile.name : 'Anonyme'
+
+  supabase
+    .from('messages')
+    .insert([
+      {
+        sender_name: senderName,
+        contact_id: currentActiveUserId,
+        content: text,
+        created_at: newMessage.timestamp,
+      },
+    ])
+    .then(({ error }) => {
+      if (error) {
+        if (!navigator.onLine || error.message === 'TypeError: Failed to fetch') {
+          console.log('Message mis en attente pour synchronisation en arrière-plan (mode hors ligne).')
+          return
+        }
+        console.error('Error saving message to Supabase:', error)
+      }
+    })
 })
 
 if (users) {
@@ -165,4 +188,56 @@ if (users) {
   })
 } else {
   console.error("Aucun user n'a été détecté")
+}
+
+async function loadMessages(username) {
+  if (!username) return
+
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].userId === MY_USER_ID) {
+      messages.splice(i, 1)
+    }
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('sender_name', username)
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching messages from Supabase:', error)
+      return
+    }
+
+    if (data) {
+      data.forEach((msg) => {
+        messages.push({
+          id: msg.id,
+          userId: MY_USER_ID,
+          contactId: msg.contact_id,
+          content: msg.content,
+          timestamp: msg.created_at || msg.timestamp,
+        })
+      })
+
+      if (currentActiveUserId) {
+        displayConversation(currentActiveUserId)
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load messages from Supabase:', err)
+  }
+}
+
+document.addEventListener('profile-updated', (e) => {
+  const profile = e.detail
+  if (profile && profile.name) {
+    loadMessages(profile.name).catch((err) => console.error('Error loading messages:', err))
+  }
+})
+const initialProfile = JSON.parse(localStorage.getItem('myProfile'))
+if (initialProfile && initialProfile.name) {
+  loadMessages(initialProfile.name).catch((err) => console.error('Error loading messages:', err))
 }

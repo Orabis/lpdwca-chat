@@ -41,6 +41,7 @@ formEditProfile.addEventListener('submit', (e) => {
     updateProfileUI()
     closeProfileModal()
     btnCancelProfileModal.style.display = 'inline-block'
+    document.dispatchEvent(new CustomEvent('profile-updated', { detail: myProfile }))
   }
 })
 

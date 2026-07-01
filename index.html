@@ -13,7 +13,7 @@
     />
   </head>
   <body>
-    <span id="offline-mode">Hors ligne</span>
+    <span id="offline-mode" style="display: none">Hors ligne</span>
     <div class="app-container" id="app-container">
       <aside class="sidebar" id="sidebar">
         <header class="sidebar-header">
@@ -33,49 +33,7 @@
             </span>
             <h1>dwca-chat</h1>
           </div>
-          <div class="header-actions">
-            <button id="btn-add-contact" title="Nouveau contact" aria-label="Ajouter un contact">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-            </button>
-          </div>
         </header>
-
-        <div class="search-container">
-          <div class="search-wrapper">
-            <span class="search-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-            </span>
-            <input
-              type="text"
-              id="contact-search"
-              placeholder="Rechercher une conversation..."
-              aria-label="Rechercher une conversation"
-            />
-            <button id="btn-clear-search" style="display: none" aria-label="Effacer la recherche">&times;</button>
-          </div>
-        </div>
 
         <nav class="contacts-list" id="contacts-list" aria-label="Liste des conversations">
           <div class="loading-placeholder" id="loading-placeholder">Chargement des conversations...</div>
@@ -124,47 +82,17 @@
             </div>
             <h2>Bienvenue sur dwca-chat</h2>
             <p>Sélectionnez une conversation dans la barre latérale pour commencer à envoyer des messages.</p>
-            <button class="btn btn-primary" id="btn-empty-start-chat">Nouvelle discussion</button>
           </div>
         </div>
 
         <div class="chat-interface" id="chat-interface" style="display: none">
           <header class="chat-header">
-            <button class="btn-back" id="btn-back" aria-label="Retour aux conversations">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-            </button>
             <div class="active-contact-info">
               <div class="user-avatar" id="active-avatar">U</div>
               <div>
                 <h2 id="active-name">Nom Utilisateur</h2>
                 <span class="status-indicator online" id="active-status">En ligne</span>
               </div>
-            </div>
-            <div class="chat-actions">
-              <button id="btn-clear-chat" title="Effacer l'historique" aria-label="Effacer l'historique de chat">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </button>
             </div>
           </header>
 
@@ -174,27 +102,6 @@
 
           <footer class="chat-input-area">
             <form id="chat-form" class="chat-form">
-              <div class="input-actions-left">
-                <button
-                  type="button"
-                  class="btn-input-action"
-                  id="btn-quick-reply"
-                  title="Simuler une réponse rapide"
-                  aria-label="Simuler une réponse"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                  </svg>
-                </button>
-              </div>
               <input
                 type="text"
                 id="chat-input"
@@ -220,33 +127,7 @@
           </footer>
         </div>
       </main>
-      <div class="modal-overlay" id="modal-add-contact" style="display: none">
-        <div class="modal-card">
-          <header class="modal-header">
-            <h3>Ajouter un contact</h3>
-            <button class="modal-close" id="btn-close-add-modal">&times;</button>
-          </header>
-          <div class="modal-body">
-            <form id="form-add-contact">
-              <div class="form-group">
-                <label for="new-contact-name">Nom complet</label>
-                <input type="text" id="new-contact-name" placeholder="Ex: Jean Dupont" required autocomplete="off" />
-              </div>
-              <div class="form-group">
-                <label for="new-contact-status">Statut de départ</label>
-                <select id="new-contact-status">
-                  <option value="online" selected>En ligne</option>
-                  <option value="offline">Hors ligne</option>
-                </select>
-              </div>
-              <div class="form-actions">
-                <button type="button" class="btn btn-secondary" id="btn-cancel-add-modal">Annuler</button>
-                <button type="submit" class="btn btn-primary">Ajouter</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+
       <div class="modal-overlay" id="modal-edit-profile" style="display: none">
         <div class="modal-card">
           <header class="modal-header">
