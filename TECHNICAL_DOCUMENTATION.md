@@ -6,9 +6,10 @@ Ce document présente l'architecture technique et le fonctionnement détaillé d
 
 ## 1. Introduction et But de l'Application
 
-**LPDWCA-Chat** est une application web de messagerie instantanée conçue spécifiquement pour les étudiants de la Licence Professionnelle Développeur Web et Mobile (LPDWCA). 
+**LPDWCA-Chat** est une application web de messagerie instantanée conçue spécifiquement pour les étudiants de la Licence Professionnelle Développeur Web et Mobile (LPDWCA).
 
 ### Objectifs principaux :
+
 - **Légèreté et Performance :** Interface construite en HTML5 sémantique, CSS moderne natif (sans framework) et JavaScript Vanilla (ES Modules).
 - **Accessibilité et Standards :** Respect des standards du Web moderne et des critères d'accessibilité.
 - **Expérience PWA Avancée :** Fonctionnement en mode déconnecté (offline) et synchronisation en arrière-plan (Background Sync).
@@ -21,6 +22,7 @@ Ce document présente l'architecture technique et le fonctionnement détaillé d
 Plutôt que d'utiliser la méthode "standard" manuelle qui consiste à écrire manuellement un fichier `manifest.json`, à coder un Service Worker complet de zéro à la main et à gérer l'enregistrement du Service Worker via des scripts personnalisés dans le code principal, l'application s'appuie sur la bibliothèque **`vite-plugin-pwa`** (configurée dans `vite.config.js`).
 
 ### Avantages de cette approche :
+
 1. **Zéro Boilerplate d'enregistrement :** Le plugin injecte automatiquement le code d'enregistrement du Service Worker dans le build final.
 2. **Génération automatique du manifeste :** Le Web App Manifest est configuré en JS et généré sous forme de fichier JSON à la compilation, garantissant la validité des chemins des assets.
 3. **Intégration Workbox transparente :** Le plugin embarque Workbox pour la mise en cache des assets (precaching) et l'injection dynamique des routes du Service Worker.
@@ -77,22 +79,29 @@ export default defineConfig({
 ### Explications des options de `VitePWA` :
 
 #### `strategies: 'injectManifest'`
+
 Par défaut, `vite-plugin-pwa` génère automatiquement un Service Worker complet basé sur des patterns prédéfinis (`generateSW`). Ici, l'option `'injectManifest'` est choisie pour nous permettre d'utiliser notre propre fichier de Service Worker source ([sw.js](file:///home/lmerkel/dev/lpdwca-chat/src/sw.js)). Le plugin va compiler notre fichier source et y injecter la liste des ressources à pré-mettre en cache (precaching manifest) à l'emplacement `self.__WB_MANIFEST`.
+
 > [!NOTE]
 > Cette stratégie est indispensable lorsque l'on souhaite intégrer des modules ou stratégies complexes de Workbox (comme le plugin de synchronisation en arrière-plan) tout en conservant le precaching automatisé de nos assets Vite.
 
 #### `srcDir: 'src'` et `filename: 'sw.js'`
+
 Définissent l'emplacement source du fichier Service Worker. Vite ira chercher [src/sw.js](file:///home/lmerkel/dev/lpdwca-chat/src/sw.js) pour le compiler et le placer à la racine du dossier de distribution (`dist/sw.js`).
 
 #### `registerType: 'autoUpdate'`
+
 Indique le comportement lors de la détection d'une nouvelle version du Service Worker. Avec `'autoUpdate'`, dès qu'un nouveau Service Worker est détecté et installé, il prend immédiatement le contrôle de l'application (en appelant en arrière-plan `skipWaiting()` et `clients.claim()`) sans afficher de boîte de dialogue de confirmation à l'utilisateur.
 
 #### `devOptions: { enabled: true, type: 'module', suppressWarnings: true }`
+
 - `enabled: true` : Permet au Service Worker de s'enregistrer et de s'exécuter également lorsque l'application tourne sur le serveur de développement (`npm run dev`), facilitant le débogage.
 - `type: 'module'` : Spécifie que le Service Worker généré en mode développement doit être traité comme un module ES (`import` natif), ce qui est nécessaire car notre [sw.js](file:///home/lmerkel/dev/lpdwca-chat/src/sw.js) utilise la syntaxe `import`.
 
 #### `manifest: { ... }`
+
 Définit la configuration de l'application installable par le système d'exploitation (PWA) :
+
 - `name` : Nom complet de l'application (utilisé sur les écrans d'installation).
 - `short_name` : Nom court affiché sous l'icône de l'application sur l'écran d'accueil mobile.
 - `description` : Description textuelle de l'application.
@@ -110,7 +119,9 @@ L'application propose des mécanismes modernes tirant parti des API du navigateu
 Le module [status.js](file:///home/lmerkel/dev/lpdwca-chat/src/status.js) gère la détection de la connectivité de l'utilisateur et interagit avec lui via les notifications système du système d'exploitation.
 
 #### Demande d'autorisation de notification
+
 Au chargement, si l'autorisation de notification n'a pas encore été décidée, l'application la demande poliment :
+
 ```javascript
 if ('Notification' in window && Notification.permission === 'default') {
   Notification.requestPermission().catch((err) => {
@@ -120,27 +131,31 @@ if ('Notification' in window && Notification.permission === 'default') {
 ```
 
 #### Système d'affichage résilient des Notifications
+
 L'affichage des notifications dispose d'un mécanisme de secours (fallback). Si la création classique via le constructeur `new Notification` échoue (par exemple, sur certains navigateurs mobiles où les notifications ne sont autorisées que via le Service Worker), le code bascule sur l'enregistrement du Service Worker :
+
 ```javascript
-window.showNotification = function(title, body) {
+window.showNotification = function (title, body) {
   if ('Notification' in window && Notification.permission === 'granted') {
     try {
       // Tentative standard
       new Notification(title, {
         body: body,
-        icon: '/favicon.svg'
+        icon: '/favicon.svg',
       })
     } catch (e) {
       // Secours via le Service Worker actif
       if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-        navigator.serviceWorker.ready.then((registration) => {
-          return registration.showNotification(title, {
-            body: body,
-            icon: '/favicon.svg'
+        navigator.serviceWorker.ready
+          .then((registration) => {
+            return registration.showNotification(title, {
+              body: body,
+              icon: '/favicon.svg',
+            })
           })
-        }).catch((err) => {
-          console.error('Service worker notification failed:', err)
-        })
+          .catch((err) => {
+            console.error('Service worker notification failed:', err)
+          })
       }
     }
   }
@@ -148,7 +163,9 @@ window.showNotification = function(title, body) {
 ```
 
 #### Écouteurs de connectivité
+
 L'application écoute les événements `online` et `offline` du navigateur pour adapter l'interface (affichage d'un bandeau "Hors ligne" en haut de la page) et avertir immédiatement l'utilisateur par notification système :
+
 ```javascript
 function updateNetworkStatus() {
   if (navigator.onLine) {
@@ -170,6 +187,7 @@ window.addEventListener('offline', updateNetworkStatus)
 C'est l'une des fonctionnalités les plus puissantes de l'application. Lorsqu'un utilisateur envoie un message alors qu'il n'a pas de réseau, le message est stocké localement et envoyé automatiquement dès que la connexion est rétablie, sans qu'aucune action manuelle ne soit requise.
 
 #### Le Service Worker : [src/sw.js](file:///home/lmerkel/dev/lpdwca-chat/src/sw.js)
+
 Nous utilisons `BackgroundSyncPlugin` fourni par la bibliothèque Google Workbox pour capturer les requêtes POST échouées.
 
 ```javascript
@@ -197,12 +215,14 @@ registerRoute(
 ```
 
 #### Comment ça fonctionne sous le capot ?
+
 1. **Precaching :** `precacheAndRoute` prend les fichiers statiques de l'application et les stocke dans le cache du Service Worker au démarrage, ce qui permet à l'application de s'ouvrir instantanément même sans réseau.
 2. **Interception :** Lorsqu'un message est envoyé, le client envoie une requête `POST` vers la table `messages` de Supabase (l'URL se termine par `/rest/v1/messages`).
 3. **Capture en cas d'échec :** La stratégie `NetworkOnly` tente d'exécuter la requête en ligne. Si la requête échoue en raison d'une panne réseau, le `BackgroundSyncPlugin` l'intercepte et stocke la requête HTTP (avec ses en-têtes et son corps JSON) dans une base de données locale **IndexedDB** nommée `workbox-background-sync`.
 4. **Rejeu Automatique :** Le navigateur enregistre une tâche de synchronisation en arrière-plan (`sync`). Dès que le système d'exploitation détecte le retour d'une connexion internet stable, il réveille le Service Worker et rejoue la requête HTTP stockée.
 
 #### Gestion côté client (`src/main.js`)
+
 Lors du clic sur envoyer, l'application met à jour immédiatement l'interface locale pour un ressenti instantané (Optimistic UI), puis tente la requête Supabase. Si elle échoue à cause du réseau, on prévient l'utilisateur que le message est mis en attente :
 
 ```javascript
@@ -269,7 +289,7 @@ formEditProfile.addEventListener('submit', (e) => {
     updateProfileUI()
     closeProfileModal()
     btnCancelProfileModal.style.display = 'inline-block' // Réactive le bouton annuler pour les futures modifications
-    
+
     // Déclenchement d'un événement global pour avertir l'application
     document.dispatchEvent(new CustomEvent('profile-updated', { detail: myProfile }))
   }
@@ -277,7 +297,9 @@ formEditProfile.addEventListener('submit', (e) => {
 ```
 
 #### Avatars Dynamiques
+
 Les avatars de la barre latérale et du panneau de discussion sont générés dynamiquement en récupérant l'initiale du nom d'affichage de l'utilisateur :
+
 ```javascript
 function updateProfileUI() {
   if (myProfile) {
@@ -294,9 +316,11 @@ function updateProfileUI() {
 Le cœur fonctionnel du tchat est orchestré dans [main.js](file:///home/lmerkel/dev/lpdwca-chat/src/main.js).
 
 #### Structure des données en mémoire
+
 L'application contient une liste d'utilisateurs statiques (nos contacts) et un tableau de messages pré-chargés en mémoire pour la démo, combinés avec les messages réels récupérés en ligne.
 
 #### Récupération sélective des messages
+
 Lorsqu'un profil est configuré (au chargement initial ou suite à une modification), l'application interroge la table `messages` de Supabase pour récupérer l'historique lié à ce pseudonyme spécifique (les messages de l'utilisateur) :
 
 ```javascript
@@ -346,7 +370,9 @@ async function loadMessages(username) {
 ```
 
 #### Écouteurs d'événements pour rechargement dynamique
+
 Grâce à l'événement personnalisé `profile-updated` déclenché par le module de profil, l'application sait exactement quand charger les messages de la base de données :
+
 ```javascript
 document.addEventListener('profile-updated', (e) => {
   const profile = e.detail
@@ -361,6 +387,7 @@ document.addEventListener('profile-updated', (e) => {
 ## 5. Synthèse des Technologies de l'App Web & PWA
 
 L'application rassemble les API du Web moderne de manière optimale :
+
 - **Web App Manifest :** Déclaré dynamiquement pour configurer les modes d'affichage (`standalone`), les couleurs de marque et les icônes d'application sur mobile et desktop.
 - **Service Worker & Cache Storage (Workbox Precaching) :** Rend l'application accessible instantanément sans réseau en servant le squelette (App Shell) directement depuis le cache.
 - **Background Sync API :** Permet une tolérance extrême aux coupures de réseau réseau sans perte de données.

@@ -6,23 +6,25 @@ if ('Notification' in window && Notification.permission === 'default') {
   })
 }
 
-window.showNotification = function(title, body) {
+window.showNotification = function (title, body) {
   if ('Notification' in window && Notification.permission === 'granted') {
     try {
       new Notification(title, {
         body: body,
-        icon: '/favicon.svg'
+        icon: '/favicon.svg',
       })
     } catch (e) {
       if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-        navigator.serviceWorker.ready.then((registration) => {
-          return registration.showNotification(title, {
-            body: body,
-            icon: '/favicon.svg'
+        navigator.serviceWorker.ready
+          .then((registration) => {
+            return registration.showNotification(title, {
+              body: body,
+              icon: '/favicon.svg',
+            })
           })
-        }).catch((err) => {
-          console.error('Service worker notification failed:', err)
-        })
+          .catch((err) => {
+            console.error('Service worker notification failed:', err)
+          })
       }
     }
   }
