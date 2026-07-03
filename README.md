@@ -1,7 +1,23 @@
 # LPDWCA-Chat
 
-Pour initialiser le projet :
+Pour initialiser le projet, avoir une bdd supabase avec comme unique table __messages__ contenant  :
 
+| NAME        | TYPE      | CONSTRAINTS                     |
+|-------------|-----------|---------------------------------|
+| id          | int8      | PRIMARY, IDENTITY, NON-NULLABLE |
+| sender_name | text      | NON-NULLABLE                    |
+| contact_id  | int4      | NON-NULLABLE                    |
+| content     | text      | NON-NULLABLE                    |
+| created_at  | timestamp | NON-NULLABLE                    |
+
+Ensuite, avoir un .env avec comme valeur (ex.)
+
+```
+VITE_SUPABASE_URL=https://exemple.supabase.co
+VITE_SUPABASE_PUBLIC_KEY=sb_publishable_JQ_blablabla
+```
+
+Et faire en ligne de commande : (npm ou pnpm disponnible)
 ```bash
 git clone https://github.com/Orabis/lpdwca-chat.git
 npm install
