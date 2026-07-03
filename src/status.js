@@ -6,6 +6,7 @@ if ('Notification' in window && Notification.permission === 'default') {
   })
 }
 
+// Envoie une notification
 window.showNotification = function (title, body) {
   if ('Notification' in window && Notification.permission === 'granted') {
     try {
@@ -30,6 +31,7 @@ window.showNotification = function (title, body) {
   }
 }
 
+// Affiche la bannière rouge et envoie une alerte si la connexion Internet est coupée
 function updateNetworkStatus() {
   if (navigator.onLine) {
     offlineBadge.style.display = 'none'

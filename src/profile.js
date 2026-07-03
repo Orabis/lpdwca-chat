@@ -9,6 +9,7 @@ const btnCancelProfileModal = document.getElementById('btn-cancel-profile-modal'
 
 let myProfile = JSON.parse(localStorage.getItem('myProfile')) || null
 
+// Met à jour le nom et la première lettre de l'avatar sur la page
 function updateProfileUI() {
   if (myProfile) {
     currentUserName.textContent = myProfile.name
@@ -16,6 +17,7 @@ function updateProfileUI() {
   }
 }
 
+// Ouvre la fenêtre pour modifier son pseudo
 function openProfileModal() {
   modalEditProfile.style.display = 'flex'
   if (myProfile) {
@@ -27,10 +29,12 @@ function openProfileModal() {
   inputProfileName.focus()
 }
 
+// Ferme la fenêtre du profil
 function closeProfileModal() {
   modalEditProfile.style.display = 'none'
 }
 
+// Sauvegarde le nouveau pseudo dans le localStorage et prévient le reste de l'appli
 formEditProfile.addEventListener('submit', (e) => {
   e.preventDefault()
   const name = inputProfileName.value.trim()

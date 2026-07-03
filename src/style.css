@@ -330,10 +330,28 @@ input:focus {
   padding: 0 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   background-color: var(--bg-primary);
   border-bottom: 1px solid var(--border);
   z-index: 5;
+}
+.btn-back {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  background: transparent;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+.btn-back:hover {
+  color: var(--text-primary);
+  background-color: var(--border-light);
+}
+.btn-back svg {
+  width: 20px;
+  height: 20px;
 }
 .active-contact-info {
   display: flex;
@@ -543,6 +561,9 @@ input:focus {
 
 /* Responsive styles */
 @media (max-width: 768px) {
+  .btn-back {
+    display: inline-flex;
+  }
   .app-container {
     width: 100%;
     overflow: hidden;

@@ -221,38 +221,59 @@ registerRoute(
 3. **Capture en cas d'échec :** La stratégie `NetworkOnly` tente d'exécuter la requête en ligne. Si la requête échoue en raison d'une panne réseau, le `BackgroundSyncPlugin` l'intercepte et stocke la requête HTTP (avec ses en-têtes et son corps JSON) dans une base de données locale **IndexedDB** nommée `workbox-background-sync`.
 4. **Rejeu Automatique :** Le navigateur enregistre une tâche de synchronisation en arrière-plan (`sync`). Dès que le système d'exploitation détecte le retour d'une connexion internet stable, il réveille le Service Worker et rejoue la requête HTTP stockée.
 
-#### Gestion côté client (`src/main.js`)
+#### Gestion résiliente côté client : Le stockage hybride (`localStorage`)
 
-Lors du clic sur envoyer, l'application met à jour immédiatement l'interface locale pour un ressenti instantané (Optimistic UI), puis tente la requête Supabase. Si elle échoue à cause du réseau, on prévient l'utilisateur que le message est mis en attente :
+Bien que l'API `BackgroundSyncPlugin` de Workbox soit implémentée dans le Service Worker, elle présente des limites majeures en conditions de test et de production :
+1. **Restrictions de sécurité (HTTPS/localhost)** : Les Service Workers ne s'enregistrent pas sur des connexions non sécurisées (ex: accès au serveur de développement local via l'IP `http://192.168.x.x:5173` sur un smartphone).
+2. **Incompatibilité iOS** : L'API `BackgroundSyncPlugin` n'est pas du tout supportée par iOS Safari.
+3. **Simulation DevTools** : Le bouton de simulation "Offline" de Chrome/Firefox ne déclenche pas le rejeu réseau au retour en ligne.
 
+Pour assurer un fonctionnement universel, nous avons mis en place une file d'attente robuste côté client en utilisant le **`localStorage`** dans [main.js](file:///j:/devs/dwca-chat/src/main.js).
+
+##### 1. Structure de la file d'attente locale
+Dès qu'un message est rédigé hors ligne, il est immédiatement poussé dans l'interface et enregistré de façon persistante dans le `localStorage` :
 ```javascript
-// Extrait de l'événement submit dans src/main.js
-supabase
-  .from('messages')
-  .insert([
-    {
-      sender_name: senderName,
-      contact_id: currentActiveUserId,
-      content: text,
-      created_at: newMessage.timestamp,
-    },
-  ])
-  .then(({ error }) => {
-    if (error) {
-      // Si on est hors ligne ou que le fetch échoue
-      if (!navigator.onLine || error.message === 'TypeError: Failed to fetch') {
-        console.log('Message mis en attente pour synchronisation en arrière-plan (mode hors ligne).')
-        if (typeof window.showNotification === 'function') {
-          window.showNotification(
-            'Message non distribué',
-            `Le message "${text}" a été mis en attente et sera envoyé dès le retour de la connexion.`
-          )
-        }
-        return
-      }
-      console.error('Error saving message to Supabase:', error)
+// Outils de gestion du stockage local
+function getPendingMessages() {
+  return JSON.parse(localStorage.getItem('pendingMessages') || '[]')
+}
+
+function savePendingMessage(msg) {
+  const pending = getPendingMessages()
+  pending.push(msg)
+  localStorage.setItem('pendingMessages', JSON.stringify(pending))
+}
+
+function removePendingMessage(msgId) {
+  let pending = getPendingMessages()
+  pending = pending.filter((m) => m.id !== msgId)
+  localStorage.setItem('pendingMessages', JSON.stringify(pending))
+}
+```
+
+##### 2. Rejeu et synchronisation réseau groupée
+Lorsque l'appareil repasse en ligne (détection de l'événement `online` de la fenêtre), ou lors de l'initialisation de l'application, la fonction `syncPendingMessages` dépile tous les messages accumulés dans le `localStorage` et les envoie en parallèle avec `Promise.all` vers Supabase pour éviter les appels concurrents et les doublons de rafraîchissement :
+```javascript
+async function syncPendingMessages() {
+  const pending = getPendingMessages()
+  if (pending.length === 0) return
+
+  // Envoi parallèle de tous les messages
+  const promises = pending.map((msg) => sendToSupabase(msg, false))
+
+  try {
+    await Promise.all(promises)
+    // Un seul rechargement global pour éviter les doublons UI
+    const profile = JSON.parse(localStorage.getItem('myProfile'))
+    if (profile && profile.name) {
+      await loadMessages(profile.name)
     }
-  })
+  } catch (err) {
+    console.error('Erreur lors de la synchronisation des messages :', err)
+  }
+}
+
+window.addEventListener('online', syncPendingMessages)
 ```
 
 ---
@@ -327,13 +348,6 @@ Lorsqu'un profil est configuré (au chargement initial ou suite à une modificat
 async function loadMessages(username) {
   if (!username) return
 
-  // Nettoyage des anciens messages locaux de l'utilisateur courant pour éviter les doublons
-  for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].userId === MY_USER_ID) {
-      messages.splice(i, 1)
-    }
-  }
-
   try {
     const { data, error } = await supabase
       .from('messages')
@@ -346,6 +360,13 @@ async function loadMessages(username) {
       return
     }
 
+    // On nettoie les messages locaux de l'utilisateur juste avant d'injecter pour éviter les doublons asynchrones (race conditions)
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].userId === MY_USER_ID) {
+        messages.splice(i, 1)
+      }
+    }
+
     if (data) {
       // Agrégation des messages récupérés dans notre tableau de messages en mémoire
       data.forEach((msg) => {
@@ -356,6 +377,14 @@ async function loadMessages(username) {
           content: msg['content'],
           timestamp: msg['created_at'] || msg['timestamp'],
         })
+      })
+
+      // Fusionne également les messages encore en attente de synchronisation locale
+      const pending = getPendingMessages()
+      pending.forEach((msg) => {
+        if (!messages.some((m) => m.id === msg.id)) {
+          messages.push(msg)
+        }
       })
 
       // Rafraîchissement de l'affichage si une conversation est en cours de visualisation
@@ -380,6 +409,29 @@ document.addEventListener('profile-updated', (e) => {
     loadMessages(profile.name).catch((err) => console.error('Error loading messages:', err))
   }
 })
+```
+
+### 4.5. Interface Mobile Tactile & Glissement (Responsive CSS/JS)
+
+Pour permettre une utilisation fluide sur smartphone, l'application propose une interface à double vue (contacts vs discussion active) animée par transitions CSS.
+
+#### Structure CSS responsive (`src/style.css`)
+Sous les résolutions mobiles (`max-width: 768px`), la barre latérale (`sidebar`) et le panneau de discussion (`chat-panel`) se positionnent en absolu et occupent 100% de la largeur. Un système de translation (`transform: translateX`) les fait coulisser :
+- **Vue par défaut (sans conversation ou retour) :** La barre de contacts est visible (`translateX(0)`), la discussion est rejetée hors écran à droite (`translateX(100%)`).
+- **Vue active (classe `.show-chat` ajoutée au conteneur principal) :** La discussion glisse à l'écran (`translateX(0)`) et la barre latérale recule légèrement vers la gauche (`translateX(-30%)`) pour donner un effet de profondeur/parallaxe.
+
+#### Bouton de retour dans l'interface (`src/main.js` & `index.html`)
+Un bouton avec une icône de flèche vers la gauche (`#btn-back-to-contacts`) est intégré au header de la discussion.
+- Il reste caché sur ordinateur (`display: none`).
+- Il apparaît en format flex sur mobile (`display: inline-flex`).
+- Un simple écouteur d'événement JavaScript gère le retour en retirant la classe `.show-chat` de l'application :
+
+```javascript
+if (btnBackToContacts) {
+  btnBackToContacts.addEventListener('click', () => {
+    appContainer.classList.remove('show-chat')
+  })
+}
 ```
 
 ---
